@@ -54,6 +54,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
+
     const graphqlQuery = {
       query: `
         {
@@ -62,20 +63,22 @@ class Feed extends Component {
               _id
               title
               content
+              imageUrl
               creator {
                 name
               }
               createdAt
             }
-          totalPosts
+            totalPosts
           }
         }
       `
     };
-    fetch(`http://localhost:8080/graphql`, {
+
+    fetch('http://localhost:8080/graphql', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.props.token}`,
+        Authorization: 'Bearer ' + this.props.token,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(graphqlQuery)
