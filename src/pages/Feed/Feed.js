@@ -152,14 +152,27 @@ class Feed extends Component {
 
     // Set up data (with image)
     const formData = new FormData();
-    formData.append('title', postData.title);
-    formData.append('content', postData.content);
     formData.append('image', postData.image);
 
-    let graphqlQuery = {
-      query: `
+    if (this.state.editPost) {
+      formData.append('oldPath', this.state.editPost.imagePath);
+    }
+
+    fetch('http://localhost:8080/post-image', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${this.props.token}`
+      },
+      body: formData
+    })
+      .then(res => res.json())
+      .then(fileResData => {
+        const imageUrl = fileResData.filePath;
+
+        let graphqlQuery = {
+          query: `
         mutation {
-          createPost(postInput: {title: "${postData.title}", imageUrl: "some url", content: "${postData.content}"}) {
+          createPost(postInput: {title: "${postData.title}", imageUrl: "${imageUrl}", content: "${postData.content}"}) {
             _id
             title
             imageUrl
@@ -171,16 +184,19 @@ class Feed extends Component {
           }
         }  
       `
-    }
+        }
 
-    fetch('http://localhost:8080/graphql', {
-      method: 'POST',
-      body: JSON.stringify(graphqlQuery),
-      headers: {
-        Authorization: `Bearer ${this.props.token}`,
-        'Content-Type': 'application/json'
-      }
-    })
+        return fetch('http://localhost:8080/graphql', {
+          method: 'POST',
+          body: JSON.stringify(graphqlQuery),
+          headers: {
+            Authorization: `Bearer ${this.props.token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+      })
+
       .then(res => {
         return res.json();
       })
@@ -199,6 +215,7 @@ class Feed extends Component {
         const post = {
           _id: resData.data.createPost._id,
           title: resData.data.createPost.title,
+          imagePath: resData.data.createPost.imageUrl,
           content: resData.data.createPost.content,
           creator: resData.data.createPost.creator,
           createdAt: resData.data.createPost.createdAt
