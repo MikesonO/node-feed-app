@@ -28,6 +28,7 @@ class Feed extends Component {
       }
     })
       .then(res => {
+        console.log(this.props);
         if (res.status !== 200) {
           throw new Error('Failed to fetch user status.');
         }
@@ -74,6 +75,8 @@ class Feed extends Component {
         }
       `
     };
+
+    console.log(this.props);
 
     fetch('http://localhost:8080/graphql', {
       method: 'POST',
